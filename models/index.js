@@ -12,7 +12,7 @@ const db = {};
 // Gunakan DOUBLE BACKSLASH (\\)
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: 'inventory.db', 
+  storage: '../../inventory.db', 
   logging: console.log // 
 });
 // -------------------------------
