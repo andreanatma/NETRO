@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rincian Modul - Inventory IP</title>
+    <script src="js/guard.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Animasi Accordion */
+        .accordion-content {
+            transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.3s;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        .rotate-chevron {
+            transition: transform 0.3s ease;
+        }
+        .rotate-chevron.open {
+            transform: rotate(180deg);
+        }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-[#f3f4f6]">
+
+    <div id="app-container">
+        <main id="main-content" class="p-6">
+            
+            <div class="content-header bg-white p-6 rounded-2xl shadow-sm mb-8 flex flex-col md:flex-row justify-between items-center border border-gray-100 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Rincian Modul</h1>
+                    <p class="text-gray-500 mt-1 font-medium">Status ketersediaan inventaris (Idle vs Used) secara detail.</p>
+                </div>
+                <div class="relative z-10 flex gap-4 mt-4 md:mt-0 text-xs font-bold bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 uppercase tracking-wide">
+                    <div class="flex items-center"><span class="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span> IDLE</div>
+                    <div class="flex items-center"><span class="w-2.5 h-2.5 bg-red-500 rounded-full mr-2"></span> USED</div>
+                </div>
+                <div class="absolute right-0 top-0 w-32 h-full bg-gradient-to-l from-blue-50 to-transparent opacity-50"></div>
+            </div>
+
+            <div id="loader" class="hidden fixed inset-0 bg-white/80 z-50 flex justify-center items-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            </div>
+
+            <div id="count-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-3 mb-2 px-1">
+                        <div class="p-2.5 bg-blue-100 text-blue-600 rounded-xl shadow-sm"><i class="fas fa-network-wired text-lg"></i></div>
+                        <h2 class="text-xl font-bold text-gray-800 tracking-tight">Modul SFP</h2>
+                    </div>
+                    <div id="sfp-container" class="space-y-4">
+                        </div>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-3 mb-2 px-1">
+                        <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl shadow-sm"><i class="fas fa-server text-lg"></i></div>
+                        <h2 class="text-xl font-bold text-gray-800 tracking-tight">Modul LPUF</h2>
+                    </div>
+                    <div id="lpuf-container" class="space-y-4">
+                        </div>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-3 mb-2 px-1">
+                        <div class="p-2.5 bg-orange-100 text-orange-600 rounded-xl shadow-sm"><i class="fas fa-microchip text-lg"></i></div>
+                        <h2 class="text-xl font-bold text-gray-800 tracking-tight">Modul Card</h2>
+                    </div>
+                    <div id="card-container" class="space-y-4">
+                        </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/count.js"></script>
+</body>
+</html>

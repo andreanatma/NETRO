@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Halaman Uji Coba Frontend JWT</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        button { margin: 5px; padding: 10px; cursor: pointer; }
+        #output { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f0f0f0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <h1>Uji Coba API Autentikasi</h1>
+
+    <div>
+        <button onclick="loginUser('staff@example.com', 'staff')">1. Login sebagai Staff</button>
+        <button onclick="loginUser('admin@example.com', 'admin')">1. Login sebagai Admin</button>
+    </div>
+    <hr>
+    <div>
+        <button onclick="fetchProtectedData('http://localhost:3000/api/test/viewer')">2. Ambil Konten Viewer (Semua User)</button>
+        <button onclick="fetchProtectedData('http://localhost:3000/api/test/staff')">2. Ambil Konten Staff (Staff & Admin)</button>
+        <button onclick="fetchProtectedData('http://localhost:3000/api/test/admin')">2. Ambil Konten Admin (Hanya Admin)</button>
+    </div>
+    <hr>
+    <div>
+        <button onclick="logout()">3. Logout (Hapus Token)</button>
+    </div>
+
+    <h2>Output dari Server:</h2>
+    <div id="output">Hasil akan ditampilkan di sini dan di Console...</div>
+
+    <script>
+        const outputDiv = document.getElementById('output');
+
+        // Fungsi untuk menampilkan output
+        function printOutput(message) {
+            console.log(message);
+            outputDiv.textContent = JSON.stringify(message, null, 2);
+        }
+
+        // Fungsi untuk Login
+        async function loginUser(email, password) {
+            printOutput(`Mencoba login sebagai ${email}...`);
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+                if (data.accessToken) {
+                    localStorage.setItem('token', data.accessToken);
+                    printOutput({ success: true, message: "Login berhasil! Token disimpan di Local Storage.", data });
+                } else {
+                    printOutput({ success: false, message: "Login Gagal!", data });
+                }
+            } catch (error) {
+                printOutput({ success: false, error: error.message });
+            }
+        }
+
+        // Fungsi untuk mengambil data yang terproteksi
+        async function fetchProtectedData(apiUrl) {
+            const token = localStorage.getItem('token');
+            printOutput(`Mencoba mengakses: ${apiUrl}`);
+
+            if (!token) {
+                printOutput({ success: false, message: "Token tidak ditemukan. Silakan login dulu." });
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: { 'x-access-token': token },
+                });
+                const responseData = await response.json(); // Mengasumsikan server selalu mengirim JSON
+                printOutput({ 
+                    status: response.status,
+                    data: responseData 
+                });
+            } catch (error) {
+                printOutput({ success: false, error: error.message });
+            }
+        }
+        
+        // Fungsi Logout
+        function logout() {
+            localStorage.removeItem('token');
+            printOutput("Logout berhasil. Token telah dihapus dari Local Storage.");
+        }
+    </script>
+</body>
+</html>

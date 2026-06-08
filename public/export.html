@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Laporan - Inventory IP</title>
+    <script src="js/guard.js"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .card-action {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-action:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Custom Select Wrapper */
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body class="bg-[#f3f4f6]">
+
+    <div id="app-container">
+        <main id="main-content" class="p-6">
+            
+            <div class="content-header glass-effect rounded-2xl p-6 mb-8 flex flex-col md:flex-row justify-between items-center relative overflow-hidden shadow-sm">
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Pusat Laporan</h1>
+                    <p class="text-gray-500 mt-1 font-medium">Unduh data inventaris dalam format profesional.</p>
+                </div>
+                <div class="absolute right-0 top-0 w-48 h-full bg-gradient-to-l from-indigo-50 to-transparent opacity-60"></div>
+            </div>
+
+            <div id="loader" class="hidden fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-16 w-16 border-4 border-indigo-600 border-t-transparent mb-4"></div>
+                <p class="text-indigo-800 font-semibold animate-pulse">Sedang memproses laporan...</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-full">
+                        <div class="flex items-center mb-6">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <h2 class="text-lg font-bold text-gray-800">Filter Data</h2>
+                        </div>
+                        
+                        <form id="export-form" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Kategori Modul</label>
+                                <div class="select-wrapper">
+                                    <select id="category" class="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3.5 appearance-none transition-colors hover:bg-white cursor-pointer">
+                                        <option value="sfp">Hanya SFP</option>
+                                        <option value="lpuf">Hanya LPUF</option>
+                                        <option value="card">Hanya Card</option>
+                                        <!-- <option value="patchcore">Hanya Patchcore</option>  -->
+                                        <option value="all">Semua Modul (Gabungan)</option>
+                                    </select>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2 ml-1">Pilih jenis data yang ingin ditampilkan.</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Filter Site (Opsional)</label>
+                                <div class="select-wrapper">
+                                    <select id="site" class="w-full bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3.5 appearance-none transition-colors hover:bg-white cursor-pointer">
+                                        <option value="">Semua Site (Global)</option>
+                                        <option value="SMG">SMG - Semarang</option>
+                                        <option value="JGJ">JGJ - Yogyakarta</option>
+                                        <option value="KDS">KDS - Kudus</option>
+                                        <option value="SLO">SLO - Solo</option>
+                                        <option value="PWT">PWT - Purwokerto</option>
+                                        <option value="PKL">PKL - Pekalongan</option>
+                                        <option value="MGL">MGL - Magelang</option>
+                                    </select>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2 ml-1">Kosongkan untuk mengambil data dari seluruh wilayah.</p>
+                            </div>
+                        </form>
+
+                        <div class="mt-8 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                                <p class="text-xs text-yellow-700 leading-relaxed">
+                                    <strong>Tips:</strong> Gunakan "Semua Modul" untuk mendapatkan rekapitulasi lengkap dalam satu file Excel (Sheet terpisah) atau satu dokumen PDF.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <button type="button" class="export-action-btn w-full text-left" data-format="pdf">
+                        <div class="card-action bg-white rounded-2xl p-6 border border-gray-100 relative overflow-hidden group">
+                            <div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-16 h-16 rounded-2xl bg-red-100 text-red-500 flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800 group-hover:text-red-600 transition-colors">Laporan PDF</h3>
+                                        <p class="text-sm text-gray-500 mt-1 max-w-sm">Format dokumen resmi dengan kop surat, tabel rapi, dan tanda tangan digital. Cocok untuk presentasi & arsip.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md group-hover:bg-red-600 transition-colors">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button type="button" class="export-action-btn w-full text-left" data-format="excel">
+                        <div class="card-action bg-white rounded-2xl p-6 border border-gray-100 relative overflow-hidden group">
+                            <div class="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-green-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-16 h-16 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform duration-300">
+                                        <i class="fas fa-file-excel"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800 group-hover:text-green-700 transition-colors">Laporan Excel</h3>
+                                        <p class="text-sm text-gray-500 mt-1 max-w-sm">Format spreadsheet mentah (.xlsx). Cocok untuk analisis data lanjutan, pivot table, atau integrasi sistem lain.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md group-hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </button>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/export.js"></script>
+</body>
+</html>

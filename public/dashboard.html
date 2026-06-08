@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Inventory IP</title>
+    <script src="js/guard.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    
+    <style>
+        /* Efek Kaca (Glassmorphism) */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        /* Efek Kartu 3D Melayang */
+        .card-3d {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .card-3d:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Sembunyikan Scrollbar tapi tetap bisa scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animasi Accordion */
+        .animate-fade-in-down {
+            animation: fadeInDown 0.3s ease-out;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-[#f3f4f6]">
+
+    <div id="app-container">
+        <main id="main-content" class="p-6">
+            
+            <div class="content-header glass-effect rounded-2xl p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden shadow-sm">
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Dashboard Overview</h1>
+                    <p class="text-gray-500 mt-1 font-medium">Ringkasan status inventaris dan aktivitas terkini Anda.</p>
+                </div>
+                <div class="relative z-10 mt-4 md:mt-0">
+                    <span id="current-date" class="text-sm font-bold text-blue-600 bg-blue-50 px-5 py-2.5 rounded-xl border border-blue-100 shadow-sm flex items-center">
+                        <i class="far fa-calendar-alt mr-2"></i> <span id="date-text">Loading...</span>
+                    </span>
+                </div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100/40 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                
+                <div class="card-3d bg-white rounded-2xl p-6 cursor-pointer relative overflow-hidden group" onclick="window.location.href='manajemen.html'">
+                    <div class="absolute -right-4 -top-4 text-blue-50 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <i class="fas fa-network-wired text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL SFP</p>
+                                <h3 class="text-4xl font-black text-gray-800 mt-1" id="total-sfp">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 shadow-inner">
+                                <i class="fas fa-network-wired text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-100 flex items-center">
+                                <i class="fas fa-check-circle mr-1.5"></i> <span id="sfp-idle">0</span>
+                            </span>
+                            <span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-100 flex items-center">
+                                <i class="fas fa-times-circle mr-1.5"></i> <span id="sfp-used">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-3d bg-white rounded-2xl p-6 cursor-pointer relative overflow-hidden group" onclick="window.location.href='manajemen.html'">
+                    <div class="absolute -right-4 -top-4 text-purple-50 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <i class="fas fa-server text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL LPUF</p>
+                                <h3 class="text-4xl font-black text-gray-800 mt-1" id="total-lpuf">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 shadow-inner">
+                                <i class="fas fa-server text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-100 flex items-center">
+                                <i class="fas fa-check-circle mr-1.5"></i> <span id="lpuf-idle">0</span>
+                            </span>
+                            <span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-100 flex items-center">
+                                <i class="fas fa-times-circle mr-1.5"></i> <span id="lpuf-used">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-3d bg-white rounded-2xl p-6 cursor-pointer relative overflow-hidden group" onclick="window.location.href='manajemen.html'">
+                    <div class="absolute -right-4 -top-4 text-orange-50 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <i class="fas fa-microchip text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL CARD</p>
+                                <h3 class="text-4xl font-black text-gray-800 mt-1" id="total-card">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600 shadow-inner">
+                                <i class="fas fa-microchip text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-lg border border-green-100 flex items-center">
+                                <i class="fas fa-check-circle mr-1.5"></i> <span id="card-idle">0</span>
+                            </span>
+                            <span class="px-2.5 py-1 bg-red-50 text-red-700 text-xs font-bold rounded-lg border border-red-100 flex items-center">
+                                <i class="fas fa-times-circle mr-1.5"></i> <span id="card-used">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="site-card" class="card-3d bg-white rounded-2xl p-6 relative overflow-hidden group cursor-pointer transition-all duration-500 h-fit">
+                    <div class="absolute -right-4 -top-4 text-emerald-50 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500">
+                        <i class="fas fa-map-marked-alt text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between mb-2">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">TOTAL SITE</p>
+                                <h3 class="text-4xl font-black text-gray-800 mt-1">7</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shadow-inner">
+                                <i class="fas fa-map-marked-alt text-xl"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-semibold border border-gray-100">
+                                <i class="fas fa-info-circle mr-1.5 text-emerald-500"></i> Wilayah Jateng & DIY
+                            </span>
+                            <div id="site-chevron" class="text-gray-400 transition-transform duration-300">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+
+                        <div id="site-list" class="hidden mt-6 pt-4 border-t border-gray-100 transition-all duration-500 ease-in-out">
+                            <p class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">Daftar Witel Terdaftar</p>
+                            <div class="grid grid-cols-2 gap-2" id="site-list-container">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 card-3d bg-white rounded-2xl p-6 border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">Distribusi Aset per Site</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Akumulasi SFP, LPUF, dan Card</p>
+                        </div>
+                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg">Tahun 2025</span>
+                    </div>
+                    <div class="relative h-80 w-full">
+                        <canvas id="assetsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-3d bg-white rounded-2xl p-6 border border-gray-100 flex flex-col h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-gray-800">Aktivitas Terkini</h3>
+                        <a href="report.html" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer">Lihat Semua</a>
+                    </div>
+                    
+                    <div id="recent-activities" class="space-y-4 flex-1 overflow-y-auto pr-2 no-scrollbar max-h-[320px]">
+                        <div class="flex flex-col items-center justify-center h-40 text-gray-400">
+                            <i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-blue-300"></i>
+                            <span class="text-sm">Sinkronisasi data...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

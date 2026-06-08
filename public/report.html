@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Aktivitas - Inventory IP</title>
+    <script src="js/guard.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Efek Kaca (Glassmorphism) */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Custom Scrollbar Table */
+        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Styling Khusus untuk Detail JSON agar rapi & turun ke bawah */
+        .code-snippet {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.75rem; 
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px;
+            color: #334155;
+            display: block;
+            width: 100%;
+            
+            /* Properti KUNCI agar teks panjang turun ke bawah (Wrapping) */
+            white-space: pre-wrap;       
+            word-wrap: break-word;       
+            overflow-wrap: break-word;   
+            max-height: 250px;           
+            overflow-y: auto;            
+        }
+    </style>
+</head>
+<body class="bg-[#f3f4f6]">
+
+    <div id="app-container">
+        <main id="main-content" class="p-6">
+            
+            <div id="loader" class="hidden fixed inset-0 bg-white/80 z-50 flex flex-col justify-center items-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent mb-3"></div>
+                <p class="text-indigo-800 font-semibold text-sm animate-pulse">Memuat data...</p>
+            </div>
+
+            <div class="content-header glass-effect rounded-2xl p-6 mb-8 relative overflow-hidden shadow-sm">
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Riwayat Aktivitas</h1>
+                        <p class="text-gray-500 mt-1 font-medium">Rekam jejak perubahan data (Audit Trail) sistem.</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                        <button id="refresh-btn" class="flex-1 md:flex-none justify-center bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors shadow-sm font-semibold flex items-center text-sm group">
+                            <i class="fas fa-sync-alt mr-2 group-hover:animate-spin"></i> Refresh
+                        </button>
+                        <button id="export-btn" class="flex-1 md:flex-none justify-center bg-green-600 text-white px-5 py-2.5 rounded-xl hover:bg-green-700 transition-colors shadow-md font-semibold flex items-center text-sm transform active:scale-95">
+                            <i class="fas fa-file-excel mr-2"></i> Export Excel
+                        </button>
+                    </div>
+
+                </div>
+                <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-purple-50 to-transparent opacity-60 pointer-events-none"></div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                
+                <div class="p-5 border-b border-gray-100 bg-gray-50/50 flex flex-wrap gap-4 items-center">
+                    <div class="relative w-full sm:w-auto">
+                        <i class="far fa-calendar-alt absolute left-3 top-3 text-gray-400 text-xs"></i>
+                        <input type="month" id="month-filter" class="w-full sm:w-auto pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm cursor-pointer outline-none">
+                    </div>
+
+                    <div class="relative w-full sm:w-auto">
+                        <i class="fas fa-map-marker-alt absolute left-3 top-3 text-gray-400 text-xs"></i>
+                        <select id="site-filter" class="w-full sm:w-auto pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm cursor-pointer outline-none appearance-none">
+                            <option value="">Semua Site</option>
+                            <option value="SMG">SMG - Semarang</option>
+                            <option value="JGJ">JGJ - Yogyakarta</option>
+                            <option value="KDS">KDS - Kudus</option>
+                            <option value="SLO">SLO - Solo</option>
+                            <option value="PWT">PWT - Purwokerto</option>
+                            <option value="PKL">PKL - Pekalongan</option>
+                            <option value="MGL">MGL - Magelang</option>
+                        </select>
+                    </div>
+
+                    <div class="relative w-full sm:w-auto">
+                        <i class="fas fa-bolt absolute left-3 top-3 text-gray-400 text-xs"></i>
+                        <select id="action-filter" class="w-full sm:w-auto pl-8 pr-10 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm cursor-pointer outline-none appearance-none">
+                            <option value="">Semua Aksi</option>
+                            <option value="CREATE">CREATE</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container overflow-x-auto">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Pengguna</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Site</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
+                                <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider min-w-[300px]">Detail Perubahan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="log-table-body" class="divide-y divide-gray-100 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center text-xs text-gray-500">
+                    <span id="log-count">Menampilkan data terbaru</span>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/report.js"></script>
+</body>
+</html>
