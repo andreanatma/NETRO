@@ -12,7 +12,7 @@ const db = {};
 // Gunakan DOUBLE BACKSLASH (\\)
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: 'inventory.db', 
+  storage: 'N:\\Semester 7\\Netro_Bot\\Project\\inventory.db', //--> Sesuaikan dengan lokasi database
   logging: console.log // 
 });
 // -------------------------------
